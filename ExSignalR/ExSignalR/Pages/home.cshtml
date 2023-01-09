@@ -1,0 +1,94 @@
+﻿@page "/"
+@model ExSignalR.Pages.homeModel
+@{
+}
+<style>
+
+
+    body {
+        font-family: "Lato", sans-serif;
+    }
+
+    .sidenav {
+        height: 100%;
+        width: 200px;
+        position: fixed;
+        z-index: 1;
+        top: 0;
+        left: 0;
+        background-color: lightgray;
+        overflow-x: hidden;
+        padding-top: 20px;
+    }
+
+        .sidenav .selected {
+            background-color: white;
+            color: blue !important;
+        }
+
+        .sidenav a {
+            padding: 6px 6px 6px 32px;
+            text-decoration: none;
+            font-size: 16px;
+            /*color: black;*/
+            display: block;
+        }
+
+            .sidenav a:hover {
+                color: green;
+            }
+
+    .main {
+        margin-left: 200px; /* Same as the width of the sidenav */
+    }
+
+</style>
+@*<div class="sidenav">
+    @foreach (var user in Model.ListOfUsers)
+    {
+        {
+            int ind = user.Email.IndexOf('@');
+            int indDot = user.Email.IndexOf('.') - ind -1;
+            string name = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(user.Email.Substring(0, ind).ToLower());
+            string domain = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(user.Email.Substring(ind+1, indDot).ToLower());
+            <a onclick="loadchat('@user.Id',this)" title="@user.Email">@name (@domain)</a>
+        }
+
+    }
+</div>*@
+
+@await Html.PartialAsync("_UsersPartial", Model.ListOfUsers)
+
+<div class="main">
+    @*<div class="col-6">
+    <ul id="messagesList"></ul>
+    </div>*@
+    <div id="div1">
+    </div>
+</div>
+
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+@*<script src="~/js/chat.js"></script>*@
+<script>
+    function loadchat(toid, ele) {
+        removeActive();
+        ele.className = "selected";
+        $.ajax({
+            url: '?handler=ChatPartial&toid=' + toid,
+            success: function (data) {
+                $("#div1").html();
+                $("#div1").html(data);
+            },
+            error: function (request, status, error) {
+                alert(request.responseText);
+            }
+        });
+    }
+    function removeActive() {
+        var divTag = document.getElementsByClassName('sidenav')[0];
+        var atags = divTag.getElementsByTagName("a");
+        [].forEach.call(atags, function (el) {
+            el.classList.remove("selected");
+        });
+    }
+</script>

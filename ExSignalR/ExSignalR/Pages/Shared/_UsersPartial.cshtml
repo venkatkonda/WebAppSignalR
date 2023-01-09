@@ -1,0 +1,16 @@
+﻿@using ExSignalR.Models
+@model List<ApplicationUser>
+
+<div class="sidenav">
+    @foreach (var user in Model)
+    {
+        {
+            int ind = user.Email.IndexOf('@');
+            int indDot = user.Email.IndexOf('.') - ind - 1;
+            string name = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(user.Email.Substring(0, ind).ToLower());
+            string domain = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(user.Email.Substring(ind + 1, indDot).ToLower());
+                    <a onclick="loadchat('@user.Id',this)" title="@user.Email">@name (@domain) (@user.Messages.Count())</a>
+        }
+
+    }
+</div>

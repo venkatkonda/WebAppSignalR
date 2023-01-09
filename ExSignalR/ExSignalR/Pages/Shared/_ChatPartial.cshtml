@@ -1,0 +1,143 @@
+﻿@using ExSignalR.Models
+@model ChatViewModel
+@{
+}
+<style>
+
+
+    ul#messagesList {
+        list-style-type: none;
+        border: solid red;
+        padding-left: 0;
+    }
+
+    .received {
+        color: crimson;
+        text-align: left;
+        width: 100%;
+    }
+
+    .sent {
+        color: green;
+        text-align: right;
+        width: 100%;
+    }
+
+    #messagesList span {
+        display: inline-block;
+        /* flex-wrap: wrap; */
+        /* padding: 20px; */
+        border-radius: 25% 10%;
+        background-color: lightgray;
+        max-width: 70%;
+        padding-left: 25px;
+        padding-right: 25px;
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    ul li {
+        padding: 20px;
+    }
+
+    #sendButton {
+        background-image: url('assets/send.png');
+        width: 25px;
+        background-color: transparent;
+        border: none;
+        background-size: 100% 100%;
+        margin-left: -40px;
+        height: 25px;
+        margin-top: 3px;
+        float: right;
+    }
+</style>
+<div>
+    <div class="Content">
+        <ul id="messagesList">
+            @*@foreach (var msg in ViewData as IEnumerable<UserMessage>)*@
+            @foreach (var msg in @Model.Messages)
+            {
+                if (msg.IsReceived)
+                {
+                    <li class="received"><span>@msg.Message</span></li>
+                }
+                else
+                {
+                    <li class="sent"><span>@msg.Message</span></li>
+                }
+            }
+        </ul>
+    </div>
+
+    <div style="display:flex;" class="Footer">
+        @*<div class="col-1">Message</div>*@
+        <input type="text" class="w-100" id="messageInput" />
+        <input type="button" id="sendButton" />
+    </div>
+</div>
+@*<div class="row p-1">
+    <div class="col-6 text-end">
+        <input type="button" id="sendButton" value="Send Message" />
+    </div>
+</div>*@
+
+<script>
+    "use strict";
+
+    var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+
+    document.getElementById("sendButton").disabled = true;
+
+    //connection.on("ReceiveMessage", function (user, message) {
+    connection.on("ReceiveMessage", function (message) {
+        //var li = document.createElement("li");
+        //var spa = document.createElement("span");
+        //li.appendChild(spa);
+        //document.getElementById("messagesList").appendChild(li);
+        //spa.textContent = `${message}`;
+        //li.className = 'received';
+        refreshchat();
+    });
+
+    connection.start().then(function () {
+        document.getElementById("sendButton").disabled = false;
+    }).catch(function (err) {
+        return console.error(err.toString());
+    });
+
+    document.getElementById("sendButton").addEventListener("click", function (event) {
+        //var user = document.getElementById("userInput").value;
+        //var e = document.getElementById("userInput");
+        //var id = e.options[e.selectedIndex].value;
+        //var user = e.options[e.selectedIndex].text;
+        var fromUserId = '@Model.FromUserId';
+        var toUserId = '@Model.ToUserId';
+        var message = document.getElementById("messageInput").value;
+        connection.invoke("SendMessage", fromUserId, toUserId, message).catch(function (err) {
+            return console.error(err.toString());
+        });
+        var li = document.createElement("li");
+        var spa = document.createElement("span");
+        li.appendChild(spa);
+        document.getElementById("messagesList").appendChild(li);
+        spa.textContent = `${message}`;
+        li.className = 'sent'
+        document.getElementById("messageInput").value = '';
+        event.preventDefault();
+    });
+
+    function refreshchat() {
+        var toid = '@Model.ToUserId';
+        $.ajax({
+            url: '?handler=ChatPartial&toid=' + toid,
+            success: function (data) {
+                $("#div1").html();
+                $("#div1").html(data);
+            },
+            error: function (request, status, error) {
+                alert(request.responseText);
+            }
+        });
+    }
+</script>

@@ -348,3 +348,5 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+ExSignalR/ExSignalR/appsettings.json
+ExSignalR/ExSignalR/appsettings.Development.json
